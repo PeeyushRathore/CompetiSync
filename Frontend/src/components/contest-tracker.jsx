@@ -1,92 +1,106 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bookmark, Calendar, Clock, RefreshCw, Sparkles } from "lucide-react"
-import ContestList from "./ContestList"
-import ThemeToggle from "./ThemeToggle"
-import { Badge } from "./ui/badge"
-import { Skeleton } from "./ui/skeleton"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Bookmark, Calendar, Clock, RefreshCw, Sparkles } from "lucide-react";
+import ContestList from "./ContestList";
+import ThemeToggle from "./ThemeToggle";
+import { Badge } from "./ui/badge";
+import { Skeleton } from "./ui/skeleton";
 
 export default function ContestTracker() {
-  const [contests, setContests] = useState([])
-  const [bookmarks, setBookmarks] = useState([])
-  const [sortPlatform, setSortPlatform] = useState("all")
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [contests, setContests] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [sortPlatform, setSortPlatform] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchContests()
-    loadBookmarks()
-  }, [])
+    fetchContests();
+    loadBookmarks();
+  }, []);
 
   const fetchContests = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/contests")
+      const response = await axios.get(
+        "https://competisync-backend.onrender.com/api/contests"
+      );
       console.log(response.data);
       if (response.data?.success && Array.isArray(response.data.data)) {
-        setContests(response.data.data)
+        setContests(response.data.data);
       } else {
-        setError("Unexpected API response format")
-        setContests([])
+        setError("Unexpected API response format");
+        setContests([]);
       }
     } catch (error) {
-      setError("Error fetching contests. Please try again later.")
-      console.error("Error fetching contests:", error)
-      setContests([])
+      setError("Error fetching contests. Please try again later.");
+      console.error("Error fetching contests:", error);
+      setContests([]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const loadBookmarks = () => {
-    const saved = JSON.parse(localStorage.getItem("bookmarkedContests") || "[]")
-    setBookmarks(saved)
-  }
+    const saved = JSON.parse(
+      localStorage.getItem("bookmarkedContests") || "[]"
+    );
+    setBookmarks(saved);
+  };
 
   const toggleBookmark = (contest) => {
-    let updatedBookmarks
+    let updatedBookmarks;
     if (bookmarks.some((b) => b._id === contest._id)) {
-      updatedBookmarks = bookmarks.filter((b) => b._id !== contest._id)
+      updatedBookmarks = bookmarks.filter((b) => b._id !== contest._id);
     } else {
-      updatedBookmarks = [...bookmarks, contest]
+      updatedBookmarks = [...bookmarks, contest];
     }
-    setBookmarks(updatedBookmarks)
-    localStorage.setItem("bookmarkedContests", JSON.stringify(updatedBookmarks))
-  }
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem(
+      "bookmarkedContests",
+      JSON.stringify(updatedBookmarks)
+    );
+  };
 
   const isBookmarked = (contestId) => {
-    return bookmarks.some((b) => b._id === contestId)
-  }
+    return bookmarks.some((b) => b._id === contestId);
+  };
 
   const upcomingContests = contests
     .filter((c) => !c.duration.includes("Ended"))
-    .filter((c) => sortPlatform === "all" || c.platform === sortPlatform)
+    .filter((c) => sortPlatform === "all" || c.platform === sortPlatform);
 
   const endedContests = contests
     .filter((c) => c.duration.includes("Ended"))
-    .filter((c) => sortPlatform === "all" || c.platform === sortPlatform)
+    .filter((c) => sortPlatform === "all" || c.platform === sortPlatform);
 
-  const platforms = Array.from(new Set(contests.map((c) => c.platform)))
+  const platforms = Array.from(new Set(contests.map((c) => c.platform)));
 
   return (
     <div className="relative min-h-screen p-6 overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
-    
       <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-blue-400 opacity-10 blur-3xl dark:bg-blue-600"></div>
       <div className="absolute bottom-20 right-20 w-80 h-80 rounded-full bg-purple-400 opacity-10 blur-3xl dark:bg-purple-600"></div>
-      
+
       <div className="relative z-10 max-w-6xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 backdrop-blur-sm bg-white/30 dark:bg-slate-900/40 p-6 rounded-2xl border border-white/20 shadow-lg">
           <div>
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
               Contest Tracker
             </h1>
-            <p className="text-slate-600 dark:text-slate-300">Track programming contests across different platforms</p>
+            <p className="text-slate-600 dark:text-slate-300">
+              Track programming contests across different platforms
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -115,9 +129,9 @@ export default function ContestTracker() {
               </SelectContent>
             </Select>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={fetchContests} 
+          <Button
+            variant="outline"
+            onClick={fetchContests}
             disabled={isLoading}
             className="bg-white/50 dark:bg-slate-800/50 hover:bg-white/70 dark:hover:bg-slate-700/70 border-white/20 dark:border-slate-700/50 transition-all"
           >
@@ -132,33 +146,42 @@ export default function ContestTracker() {
 
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="grid w-full grid-cols-3 backdrop-blur-sm bg-white/40 dark:bg-slate-900/40 rounded-xl p-1 border border-white/20 dark:border-slate-700/50">
-            <TabsTrigger 
+            <TabsTrigger
               value="upcoming"
               className="data-[state=active]:bg-white/70 dark:data-[state=active]:bg-slate-800/70 data-[state=active]:backdrop-blur-md transition-all duration-300"
             >
               <Calendar className="h-4 w-4 mr-2" />
               Upcoming
-              <Badge variant="outline" className="ml-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/40">
+              <Badge
+                variant="outline"
+                className="ml-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/40"
+              >
                 {upcomingContests.length}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="ended"
               className="data-[state=active]:bg-white/70 dark:data-[state=active]:bg-slate-800/70 data-[state=active]:backdrop-blur-md transition-all duration-300"
             >
               <Clock className="h-4 w-4 mr-2" />
               Ended
-              <Badge variant="outline" className="ml-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40">
+              <Badge
+                variant="outline"
+                className="ml-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40"
+              >
                 {endedContests.length}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="bookmarked"
               className="data-[state=active]:bg-white/70 dark:data-[state=active]:bg-slate-800/70 data-[state=active]:backdrop-blur-md transition-all duration-300"
             >
               <Bookmark className="h-4 w-4 mr-2" />
               Bookmarked
-              <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40">
+              <Badge
+                variant="outline"
+                className="ml-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40"
+              >
                 {bookmarks.length}
               </Badge>
             </TabsTrigger>
@@ -168,14 +191,17 @@ export default function ContestTracker() {
             <Card className="backdrop-blur-md bg-white/60 dark:bg-slate-900/60 border border-white/20 dark:border-slate-700/50 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="   bg-gradient-to-r from-blue-500/10 to-blue-600/10 dark:from-blue-800/20 dark:to-blue-900/20 border-b border-blue-100/30 dark:border-blue-900/30 ">
                 <CardTitle className=" flex items-center text-xl mt-6 w-full gap-2 text-blue-600 dark:text-blue-400">
-                 <Sparkles className="h-6 w-6" /> Upcoming Contests
+                  <Sparkles className="h-6 w-6" /> Upcoming Contests
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {isLoading ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-16 w-full bg-blue-100/50 dark:bg-slate-700/50" />
+                      <Skeleton
+                        key={i}
+                        className="h-16 w-full bg-blue-100/50 dark:bg-slate-700/50"
+                      />
                     ))}
                   </div>
                 ) : (
@@ -202,7 +228,10 @@ export default function ContestTracker() {
                 {isLoading ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                      <Skeleton key={i} className="h-16 w-full bg-purple-100/50 dark:bg-slate-700/50" />
+                      <Skeleton
+                        key={i}
+                        className="h-16 w-full bg-purple-100/50 dark:bg-slate-700/50"
+                      />
                     ))}
                   </div>
                 ) : (
@@ -236,7 +265,10 @@ export default function ContestTracker() {
                 ) : (
                   <div className="text-center py-12 text-slate-500 dark:text-slate-400 bg-amber-50/30 dark:bg-amber-900/10 rounded-xl border border-amber-100/30 dark:border-amber-800/30">
                     <Bookmark className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                    <p>No contests bookmarked. Bookmark contests to see them here.</p>
+                    <p>
+                      No contests bookmarked. Bookmark contests to see them
+                      here.
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -245,5 +277,5 @@ export default function ContestTracker() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
