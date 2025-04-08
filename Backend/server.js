@@ -19,7 +19,6 @@ await dbConnect();
 app.get("/api/contests", async (req, res) => {
   try {
     const contests = await Contest.find().sort({ startTime: 1 });
-    console.log("Backend Data Served:", contests);
     res.json({ success: true, data: contests });
   } catch (error) {
     res
